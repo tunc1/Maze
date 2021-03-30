@@ -1,13 +1,44 @@
 package app.map;
 
-import app.gameObject.GameObject;
+import app.gameObject.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Map
 {
 	private GameObject[][] map;
+	private List<Guard> guards;
+	private Player player;
+	private int stars;
 	public Map(int height,int width)
 	{
+		stars=0;
 		map=new GameObject[height][width];
+		guards=new ArrayList<>();
+	}
+	public int getStars()
+	{
+		return stars;
+	}
+	public void setStars(int stars)
+	{
+		this.stars=stars;
+	}
+	public Player getPlayer()
+	{
+		return player;
+	}
+	public void setPlayer(Player player)
+	{
+		this.player=player;
+	}
+	public List<Guard> getGuards()
+	{
+		return new ArrayList<>(guards);
+	}
+	public void addGuard(Guard guard)
+	{
+		guards.add(guard);
 	}
 	public int getMapWidth()
 	{
@@ -37,20 +68,11 @@ public class Map
 	{
 		return x>-1&&x<getMapWidth()&&y>-1&&y<getMapHeight();
 	}
-	public String toString()
-	{
-		StringBuilder output=new StringBuilder();
-		for (GameObject[] gameObjects:map)
-		{
-			for (GameObject gameObject:gameObjects)
-			{
-				if(gameObject!=null)
-					output.append(gameObject);
-				else
-					output.append(" ");
-			}
-			output.append("\n");
-		}
-		return output.toString();
-	}
+    public GameObject[][] getGameObjects()
+    {
+        GameObject[][] tmp=new GameObject[getMapHeight()][getMapWidth()];
+        for(int y=0;y<getMapHeight();y++)
+            tmp[y]=map[y].clone();
+        return tmp;
+    }
 }

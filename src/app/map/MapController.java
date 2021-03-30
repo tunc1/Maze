@@ -1,52 +1,77 @@
 package app.map;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 import app.direction.Direction;
 import app.gameObject.*;
+import java.util.List;
 
 public class MapController
 {
 	private Map map;
-	private Player player;
-	private Scanner scanner;
-	private int starCount;
+	private MapView view;
 	private boolean gameFinished;
-	private List<Guard> guards;
 	private Direction[] directions={Direction.RIGHT,Direction.LEFT,Direction.UP,Direction.DOWN};
-	public MapController()
+	public MapController(Map map,MapView view)
 	{
-		scanner=new Scanner(System.in);
-		map=new Map(20,20);
-		starCount=0;
+		this.map=map;
+		this.view=view;
 		gameFinished=false;
-		guards=new ArrayList<>();
 		fillMap();
+	}
+	public Map getMap()
+	{
+		return map;
 	}
 	public void startGame()
 	{
 		while(!gameFinished)
 		{
-			System.out.println(map);
-			System.out.println("Star Count That Has to be collected:"+starCount);
-			Direction direction=getDirectionFromUser();
-			movePlayer(player,direction);
-			moveGuards();
+			view.show(map);
+			view.message("Stars that must be collected:"+map.getStars());
+			view.message("Right:d|Left:a|Up:w|Down:s");
+			char input=view.getInput();
+			Direction direction=null;
+			switch(input)
+            {
+                case 'w':
+                   direction=Direction.UP;
+                break;
+                case 's':
+                   direction=Direction.DOWN;
+                break;
+                case 'a':
+                   direction=Direction.LEFT;
+                break;
+                case 'd':
+                   direction=Direction.RIGHT;
+                break;
+                default:
+                    view.message("Invalid Input");
+                break;
+            }
+			if(direction!=null)
+			{
+				movePlayer(direction);
+				moveGuards();
+			}
 		}
-		System.out.println("Game Finished");
+		view.message("Game Finished");
+	}
+	private Direction getRandomDirection(GameObject gameObject)
+	{
+		int random=(int)(Math.random()*directions.length);
+		Direction direction=directions[random];
+		while(!isInBounds(gameObject,direction))
+		{
+			random=(int)(Math.random()*directions.length);
+			direction=directions[random];
+		}
+		return direction;
 	}
 	private void moveGuards()
 	{
-		for(Guard guard:guards)
+		for(Guard guard:map.getGuards())
 		{
-			int random=(int)(Math.random()*directions.length);
-			Direction direction=directions[random];
-			while(!isInBounds(guard,direction))
-			{
-				random=(int)(Math.random()*directions.length);
-				direction=directions[random];
-			}
+			Direction direction=getRandomDirection(guard);
 			moveGuard(guard,direction);
 		}
 	}
@@ -63,13 +88,6 @@ public class MapController
 			if(gameObject instanceof OnGuardCollideWith)
 				((OnGuardCollideWith)gameObject).onGuardCollideWith(this,guard,direction);
 		}
-	}
-	private Direction getDirectionFromUser()
-	{
-		System.out.println("Right:0|Left:1|Up:2|Down:3");
-		String s=scanner.nextLine();
-		int i=Integer.parseInt(s);
-		return directions[i];
 	}
 	private int[] getPoint(GameObject gameObject,Direction direction)
 	{
@@ -106,8 +124,9 @@ public class MapController
 		int y=point[1];
 		return !map.gameObjectExists(x,y);
 	}
-	private void movePlayer(Player player,Direction direction)
+	private void movePlayer(Direction direction)
 	{
+		Player player=map.getPlayer();
 		if(isInBounds(player,direction))
 		{
 			if(canMove(player,direction))
@@ -139,19 +158,17 @@ public class MapController
 	{
 		gameFinished=true;
 	}
-	public Player getPlayer()
+	public void checkGame()
 	{
-		return player;
-	}
-	public int getStarCount()
-	{
-		return starCount;
+		if(map.getStars()==0)
+			finishGame();
 	}
 	private void fillMap()
 	{
 		GameObjectFactory gameObjectFactory=new GameObjectFactory();
-		player=(Player)gameObjectFactory.create("player");
+		Player player=(Player)gameObjectFactory.create("player");
 		player.setXY(0,0);
+		map.setPlayer(player);
 		map.setGameObject(player);
 		GameObject box=gameObjectFactory.create("box");
 		box.setXY(1,2);
@@ -169,23 +186,19 @@ public class MapController
 		int[][] stars={{3,3},{7,4},{8,2},{0,1}};
 		for (int[] point:stars)
 		{
-			starCount++;
 			GameObject star=gameObjectFactory.create("star");
 			star.setXY(point[0],point[1]);
 			map.setGameObject(star);
+			map.setStars(map.getStars()+1);
 		}
 		int[][] guardLocations={{0,2},{5,9},{10,18}};
 		for (int[] point:guardLocations)
 		{
 			Guard guard=(Guard)gameObjectFactory.create("guard");
 			guard.setXY(point[0],point[1]);
-			guards.add(guard);
+			map.addGuard(guard);
 			map.setGameObject(guard);
 		}
-	}
-	public void decreaseStarCount(int i)
-	{
-		starCount-=i;
 	}
 	public void remove(GameObject gameObject)
 	{

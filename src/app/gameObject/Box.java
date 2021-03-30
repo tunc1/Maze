@@ -14,7 +14,7 @@ public class Box extends GameObject implements OnPlayerCollideWith,OnGuardCollid
 		if(mapController.canMove(this,direction))
 		{
 			mapController.move(this,direction);
-			mapController.move(mapController.getPlayer(),direction);
+			mapController.move(mapController.getMap().getPlayer(),direction);
 		}
 	}
 	public void onGuardCollideWith(MapController mapController,Guard guard,Direction direction)

@@ -11,7 +11,6 @@ public class Exit extends GameObject implements OnPlayerCollideWith
 	}
 	public void onPlayerCollideWith(MapController mapController,Direction direction)
 	{
-		if(mapController.getStarCount()==0)
-			mapController.finishGame();
+		mapController.checkGame();
 	}
 }

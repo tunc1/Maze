@@ -1,12 +1,11 @@
 package app;
 
-import app.map.MapController;
+import app.map.*;
 
 public class Main
 {
 	public static void main(String[] args)
 	{
-		MapController controller=new MapController();
-		controller.startGame();
+		new MapController(new Map(20,20),new MapView()).startGame();
 	}
 }

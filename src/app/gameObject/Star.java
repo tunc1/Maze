@@ -12,7 +12,7 @@ public class Star extends GameObject implements OnPlayerCollideWith
 	public void onPlayerCollideWith(MapController mapController,Direction direction)
 	{
 		mapController.remove(this);
-		mapController.move(mapController.getPlayer(),direction);
-		mapController.decreaseStarCount(1);
+		mapController.move(mapController.getMap().getPlayer(),direction);
+		mapController.getMap().setStars(mapController.getMap().getStars()-1);
 	}
 }
